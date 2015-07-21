@@ -84,7 +84,13 @@ module CiteTrans
       end
 
       def surnames
-        self.map { |name| "#{name[:surname]}" }
+        self.people.select { |person| !!person[:surname] }
+          .map { |name| "#{name[:surname]}" }
+      end
+
+      def given_names
+        self.people.select { |person| !!person[:given_names] }
+          .map { |name| "#{name[:given_names]}" }
       end
 
       def initials

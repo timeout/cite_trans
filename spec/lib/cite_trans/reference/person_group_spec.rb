@@ -126,4 +126,33 @@ RSpec.describe CiteTrans::Reference::PersonGroup do
       expect(person_group == other_group).to be_truthy
     end
   end
+
+  describe '#surnames' do
+    it 'extracts one surnames' do
+      person_group.add_name surname: 'Moss', given_names: 'Brendan'
+      expect(person_group.surnames.size).to eq(1)
+    end
+
+    it 'extracts an array of surnames' do
+      person_group.add_name surname: 'Moss', given_names: 'Brendan'
+      person_group.add_name surname: 'Howland', given_names: 'John'
+      expect(person_group.surnames).to eq(['Moss', 'Howland'])
+    end
+
+    it 'extracts an array of surnames' do
+      person_group.add_name surname: 'Moss', given_names: 'Brendan'
+      person_group.add_name surname: 'Howland', given_names: 'John'
+      person_group.add_name surname: nil, given_names: 'John'
+      expect(person_group.surnames).to eq(['Moss', 'Howland'])
+    end
+  end
+
+  describe '#given_names' do
+    it 'extracts an array of given names' do
+      person_group.add_name surname: 'Moss', given_names: 'Brendan'
+      person_group.add_name surname: 'Howland', given_names: 'John'
+      person_group.add_name surname: nil, given_names: nil
+      expect(person_group.given_names).to eq(['Brendan', 'John'])
+    end
+  end
 end

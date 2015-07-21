@@ -22,6 +22,8 @@ RSpec.describe CiteTrans::Styles::APA do
     @with_context = JPTSExtractor::ArticlePart::Text.new
     @with_context.add_fragment(JPTSExtractor::ArticlePart::InlineText::InlineText
       .new("Kohane has described James Barnet as being an important figure"))
+
+    CiteTrans.end_references.references.clear
   end
 
 

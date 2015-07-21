@@ -23,15 +23,28 @@ module CiteTrans
     def detect_same_surname(other_reference)
       return false if other_reference.nil? or other_reference.authors.nil?
       
-      self.references.each do |reference|
-        return false if reference.authors.size != other_reference.authors.size
-        reference.authors.zip(other_reference.authors).each do |author_pair|
-          self_author = author_pair.first
-          other_author = author_pair.last
-          return true if self_author[:surname] == other_author[:surname]
-        end unless reference == other_reference
-      end unless self.references.nil?
+      filter = select_surnames(other_reference.authors)
+      filter.each do |reference|
+        return true if reference.authors.given_names != other_reference.authors.given_names
+      end
       false
     end
+
+    def multiple_sources?(other_reference)
+      return false if other_reference.nil? or other_reference.authors.nil?
+      filter = select_surnames(other_reference.authors)
+      sources = filter.select do |reference|
+        (reference.authors.given_names == other_reference.authors.given_names) and
+          reference != other_reference
+      end
+      not sources.empty?
+    end
+
+    def select_surnames(author_names)
+      self.references.select do |reference|
+        reference.authors.surnames == author_names.surnames
+      end
+    end
+
   end
 end

@@ -38,7 +38,7 @@ module CiteTrans
           year_compare = self.year <=> other.year
           return year_compare unless year_compare.zero?
 
-          return source_compare = self.source <=> other.source
+          return self.source <=> other.source
         end
 
         if self_term.is_a? String and 

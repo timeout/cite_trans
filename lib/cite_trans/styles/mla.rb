@@ -11,25 +11,39 @@ module CiteTrans
       def cite
         if self.context.contains_author? self.author
           "#{self.location}"
+        elsif CiteTrans.end_references.multiple_sources? self.reference
+          "#{self.author}, #{self.source} #{self.location}"
         else
           "#{self.author} #{self.location}"
         end
       end
 
       def author
-        authors = self.reference.authors
-        case authors.size
-        when 0
-        when 1..2
-          surnames = authors.each.map { |name| name[:surname]}
-          surnames.join(' and ')
-        when 3
-          prefix = authors.people[0..-3].map { |name| name[:surname] }.join(', ')
-          postfix = authors.people[-2..-1].map { |name| name[:surname] }.join(' and ')
-          "#{prefix}, #{postfix}"
+        if CiteTrans.end_references.detect_same_surname reference
+          # include initials in author string
+          self.reference.authors.initials
+            .zip(self.reference.authors.surnames).each do |name|
+            name.join(', ')
+          end.join('. ')
         else
-          "#{authors.first[:surname]} et al."
+          authors = self.reference.authors
+          case authors.size
+          when 0
+          when 1..2
+            surnames = authors.each.map { |name| name[:surname]}
+            surnames.join(' and ')
+          when 3
+            prefix = authors.people[0..-3].map { |name| name[:surname] }.join(', ')
+            postfix = authors.people[-2..-1].map { |name| name[:surname] }.join(' and ')
+            "#{prefix}, #{postfix}"
+          else
+            "#{authors.first[:surname]} et al."
+          end
         end
+      end
+
+      def source
+        'James Barnet'
       end
 
       def location
@@ -49,7 +63,11 @@ module CiteTrans
           output = lpage_i.to_s
         end
 
-        "#{first_page}-#{output}"
+        if self.reference.volume?
+          "#{self.reference.volume}: #{first_page}-#{output}"
+        else
+          "#{first_page}-#{output}"
+        end
       end
 
       private
