@@ -10,31 +10,33 @@ require 'jpts_extractor'
 module CiteTrans
   def self.translate!(io)
     article = JPTSExtractor.extract(io)
-    root_section = article.body.sections
+    # root_section = article.body.sections
    
+    # chap_extract = ChapterExtractor.new
+    # chap_extract.format(root_section)
 
-    chap_extract = ChapterExtractor.new
-    chap_extract.format(root_section)
-
-    chap_extract.chapters.each do |chapter|
-      puts "#{chapter.to_s}\n"
-    end
+    # chap_extract.chapters.each do |chapter|
+    #   puts "#{chapter.to_s}\n"
+    # end
 
     # get in text citations 
-    cite_notes = CitationNotes.new(chap_extract.chapters)
-    notes = cite_notes.citations
-    notes.each_with_index do |note, index|
-      puts "#{index + 1}: #{note.text}"
-    end
+    # cite_notes = CitationNotes.new(chap_extract.chapters)
+    # notes = cite_notes.citations
+    # notes.each_with_index do |note, index|
+    #   puts "#{index + 1}: #{note.text}"
+    # end
 
-    end_references = index_references(article.back.ref_list)
+    index_references(article.back.ref_list)
 
+    # puts "end_references[1] (authors): #{end_references[1].authors}"
+  end
+
+  def self.end_references
+    @@end_references ||= EndReferences.new
   end
 
   private
   def self.index_references(article_reference_list)
-    end_references = EndReferences.new
-
     article_reference_list.each_with_index do |ref, index|
       authors = Reference::PersonGroup.new
       ref.author_names.each do |author|
@@ -60,10 +62,9 @@ module CiteTrans
 
       end_references << reference
     end
-    end_references
   end
 end
 
 # CiteTrans.translate! File.open('/home/joe/documents/corpora/0127478/tei/0127478.xml')
-CiteTrans.translate! File.open('/home/joe/documents/corpora/0129366/tei/0129366.xml')
+# CiteTrans.translate! File.open('/home/joe/documents/corpora/0129366/tei/0129366.xml')
 # CiteTrans.translate! File.open('dummy_article.xml')

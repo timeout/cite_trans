@@ -1,3 +1,7 @@
+require 'cite_trans/text/context'
+
+require 'jpts_extractor'
+
 module CiteTrans
   module Text
     class Chapter
@@ -8,10 +12,12 @@ module CiteTrans
       end
 
       def each
-        buffer = Array.new
+        buffer = JPTSExtractor::ArticlePart::Text.new
+
         @text.fragments.each do |frag|
           if frag.is_a? JPTSExtractor::ArticlePart::InlineText::Citation
-            yield Citation.new(frag, buffer)
+            reference = CiteTrans.end_references[frag.text.to_i - 1]
+            yield Citation.new(reference, Context.new(buffer))
           end
           buffer << frag
         end

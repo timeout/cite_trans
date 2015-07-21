@@ -1,28 +1,38 @@
 require 'cite_trans/citation'
 
+require 'jpts_extractor'
+
 RSpec.describe CiteTrans::Citation do
 
-  let(:pos) { 10 }
+  let(:text) { JPTSExtractor::ArticlePart::Text.new }
   let(:ref) { CiteTrans::Reference::Reference.new }
   let(:author) { CiteTrans::Reference::PersonGroup.new }
 
   describe '#initialize' do
-    it 'is constructed by a position and a reference' do
+    it 'is constructed by a reference and a text context' do
       author.add_name surname: 'Holland', given_names: 'WG'
       ref.authors = author
-      CiteTrans::Citation.new(pos, ref)
-    end
-
-    it 'reads the pos' do
-      ref.authors = author.add_name surname: 'Holland', given_names: 'WG'
-      citation = CiteTrans::Citation.new(pos, ref)
-      expect(citation.pos).to eq pos
+      text.add_fragment(JPTSExtractor::ArticlePart::InlineText::InlineText
+        .new('This is the text context'))
+      CiteTrans::Citation.new(ref, text)
     end
 
     it 'reads the reference' do
-      ref.authors = author.add_name surname: 'Holland', given_names: 'WG'
-      citation = CiteTrans::Citation.new(pos, ref)
-      expect(citation.reference).to eq ref
+      author.add_name surname: 'Holland', given_names: 'WG'
+      ref.authors = author
+      text.add_fragment(JPTSExtractor::ArticlePart::InlineText::InlineText
+        .new('This is the text context'))
+      citation = CiteTrans::Citation.new(ref, text)
+      expect(citation.reference.authors.include? 'Holland').to be_truthy
+    end
+
+    it 'reads the text context' do
+      author.add_name surname: 'Holland', given_names: 'WG'
+      ref.authors = author
+      text.add_fragment(JPTSExtractor::ArticlePart::InlineText::InlineText
+        .new('This is the text context'))
+      citation = CiteTrans::Citation.new(ref, text)
+      expect(citation.context.to_s).to eq 'This is the text context'
     end
   end
 

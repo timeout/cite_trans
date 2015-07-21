@@ -14,11 +14,11 @@ module CiteTrans
 
       def <=>(other)
         return nil unless other.is_a? PersonGroup
-        return nil if self.people.nil? and other.people.nil?
+        return nil if self.people.nil? or other.people.nil?
 
         compare_authors = self.people.zip(other.people)
         compare_authors.each do |author_compare|
-          surname = author_compare.first[:surname]
+          surname = author_compare.first.nil? ? "" : author_compare.first[:surname]
           other_surname = author_compare.last.nil? ? "" : author_compare.last[:surname]
           given_names = author_compare.first.nil? ? "" : author_compare.first[:given_names]
           other_given_names = author_compare.last.nil? ? "" : author_compare.last[:given_names]
@@ -81,6 +81,18 @@ module CiteTrans
       def to_s
         self.map { |name| "#{name[:surname]}, #{name[:given_names]}"}
           .join(', ')
+      end
+
+      def surnames
+        self.map { |name| "#{name[:surname]}" }
+      end
+
+      def initials
+        self.map do |name|
+          given_names = name[:given_names]
+          given_names_arry = given_names.split
+          given_names_arry.map { |part| part.upcase[0, 1] }.join('.')
+        end
       end
 
       private

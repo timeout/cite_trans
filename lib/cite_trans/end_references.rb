@@ -15,8 +15,13 @@ module CiteTrans
       self.references.nil? ? 0 : self.references.size
     end
 
-    def detect_same_author(other_reference)
-      return false if other_reference.authors.nil?
+    def [](index)
+      raise IndexError.new unless index < self.size
+      @references[index]
+    end
+
+    def detect_same_surname(other_reference)
+      return false if other_reference.nil? or other_reference.authors.nil?
       
       self.references.each do |reference|
         return false if reference.authors.size != other_reference.authors.size

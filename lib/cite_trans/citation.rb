@@ -4,10 +4,12 @@ module CiteTrans
   class Citation
 
     def initialize(reference, context)
-      @referene, @context = reference, context
+      @reference, @context = reference, context
     end
 
-    attr_reader :reference, :context
+    attr_accessor :reference, :context
+
+    def cite; end
 
   end
 end

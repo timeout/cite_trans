@@ -112,7 +112,7 @@ RSpec.describe CiteTrans::Reference::PersonGroup do
 
     it 'is not equal' do
       person_group.add_name(surname: 'Holland', given_names: 'WG')
-      expect(person_group == other_group).to be_falsey
+      expect(person_group <=> other_group).to be_nil
     end
 
     it 'is not equal if both authors are nil' do
