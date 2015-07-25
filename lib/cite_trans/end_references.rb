@@ -1,3 +1,5 @@
+require 'cite_trans/reference/person_group'
+
 module CiteTrans
   class EndReferences
 
@@ -16,7 +18,7 @@ module CiteTrans
     end
 
     def [](index)
-      raise IndexError.new unless index < self.size
+      raise IndexError.new unless index <= self.size
       @references[index]
     end
 
@@ -42,7 +44,8 @@ module CiteTrans
 
     def select_surnames(author_names)
       self.references.select do |reference|
-        reference.authors.surnames == author_names.surnames
+        # puts "reference: #{reference}"
+        reference.authors.surnames == author_names.surnames unless reference.authors.nil?
       end
     end
 

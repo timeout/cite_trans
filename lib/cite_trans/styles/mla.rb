@@ -38,7 +38,7 @@ module CiteTrans
             "#{prefix}, #{postfix}"
           else
             "#{authors.first[:surname]} et al."
-          end
+          end unless authors.nil?
         end
       end
 

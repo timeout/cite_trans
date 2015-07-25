@@ -4,31 +4,30 @@ require 'cite_trans/end_references'
 
 require 'cite_trans/reference/reference'
 require 'cite_trans/reference/person_group'
+require 'cite_trans/text/context'
+require 'cite_trans/styles/mla'
 
 require 'jpts_extractor'
 
 module CiteTrans
   def self.translate!(io)
     article = JPTSExtractor.extract(io)
-    # root_section = article.body.sections
-   
-    # chap_extract = ChapterExtractor.new
-    # chap_extract.format(root_section)
-
-    # chap_extract.chapters.each do |chapter|
-    #   puts "#{chapter.to_s}\n"
-    # end
-
-    # get in text citations 
-    # cite_notes = CitationNotes.new(chap_extract.chapters)
-    # notes = cite_notes.citations
-    # notes.each_with_index do |note, index|
-    #   puts "#{index + 1}: #{note.text}"
-    # end
-
     index_references(article.back.ref_list)
 
-    # puts "end_references[1] (authors): #{end_references[1].authors}"
+    article.body.sections.map do |section|
+      section.map!(section) do |block|
+        if block.is_a? JPTSExtractor::ArticlePart::Text
+          chapter = Text::Chapter.new(block)
+          chapter.cite! :mla
+          block = chapter.text
+        else
+          block = block
+        end
+      end
+    end
+
+    puts article
+    article
   end
 
   def self.end_references
@@ -65,6 +64,3 @@ module CiteTrans
   end
 end
 
-# CiteTrans.translate! File.open('/home/joe/documents/corpora/0127478/tei/0127478.xml')
-# CiteTrans.translate! File.open('/home/joe/documents/corpora/0129366/tei/0129366.xml')
-# CiteTrans.translate! File.open('dummy_article.xml')

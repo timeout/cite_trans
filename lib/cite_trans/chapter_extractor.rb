@@ -1,3 +1,5 @@
+require 'cite_trans/text/chapter'
+
 module CiteTrans
   class ChapterExtractor
     def initialize
@@ -12,7 +14,7 @@ module CiteTrans
         when JPTSExtractor::ArticlePart::Section
           subsection.format(self)
         when JPTSExtractor::ArticlePart::Text
-          @chapters << subsection
+          @chapters << Text::Chapter.new(subsection)
 
           # puts "========== paragraph ==========\n"
           # fragments = subsection.fragments

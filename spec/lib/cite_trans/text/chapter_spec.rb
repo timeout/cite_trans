@@ -1,51 +1,112 @@
 require 'cite_trans/text/chapter'
-require 'cite_trans/reference/reference'
+require 'cite_trans/styles'
 require 'cite_trans'
 
 require 'jpts_extractor'
+require 'pathname'
 
 RSpec.describe CiteTrans::Text::Chapter do
-
-  before(:each) do
-    @text = JPTSExtractor::ArticlePart::Text.new
-    @text.add_fragment(JPTSExtractor::ArticlePart::InlineText::InlineText
-      .new('"Shortcuts make for long delays", said Gandalf ['))
-    @text.add_fragment(JPTSExtractor::ArticlePart::InlineText::Citation
-      .new(JPTSExtractor::ArticlePart::InlineText::InlineText
-      .new('1')))
-    @text.add_fragment(JPTSExtractor::ArticlePart::InlineText::InlineText
-      .new(']. "Idiot," replied Bilbo ['))
-    @text.add_fragment(JPTSExtractor::ArticlePart::InlineText::Citation
-      .new(JPTSExtractor::ArticlePart::InlineText::InlineText.new('2')))
-    @text.add_fragment(JPTSExtractor::ArticlePart::InlineText::InlineText
-      .new('].'))
-  end
-
-  let(:chapter) { CiteTrans::Text::Chapter.new(@text) }
+  let(:no_citation_path) {Pathname.new 'spec/fixture/paragraph_no_citation.xml'}
+  let(:citation_frag_path) {Pathname.new 'spec/fixture/paragraph_citation_fragment.xml'}
+  let(:citation_mult_path) {Pathname.new 'spec/fixture/paragraph_multiple_citation.xml'}
+  let(:citation_range_path) {Pathname.new 'spec/fixture/paragraph_range_citation.xml'}
 
   describe '#initialize' do
     it 'constructs a chapter' do
-      chapter 
+      article = JPTSExtractor.extract no_citation_path.open
+      CiteTrans.index_references(article.back.ref_list)
+      article.body.sections.each do |section|
+        section.each(section) do |block|
+          if block.is_a? JPTSExtractor::ArticlePart::Text
+            chapter = CiteTrans::Text::Chapter.new(block)
+            chapter.each do |fragment| 
+              expect(fragment.is_a? CiteTrans::Text::CitationFragment)
+                .to be_falsey
+            end
+          end
+        end
+      end
+    end
+
+    it 'constructs a chapter' do
+      article = JPTSExtractor.extract citation_frag_path.open
+      article.body.sections.each do |section|
+        section.each(section) do |block|
+          if block.is_a? JPTSExtractor::ArticlePart::Text
+            chapter = CiteTrans::Text::Chapter.new(block)
+            count = chapter.count {|fragment| fragment.is_a? CiteTrans::Text::CitationFragment}
+            expect(count).to eq(1)
+          end
+        end
+      end
+    end
+
+    it 'constructs a chapter' do
+      article = JPTSExtractor.extract citation_mult_path.open
+      article.body.sections.each do |section|
+        section.each(section) do |block|
+          if block.is_a? JPTSExtractor::ArticlePart::Text
+            chapter = CiteTrans::Text::Chapter.new(block)
+            count = chapter.count {|fragment| fragment.is_a? CiteTrans::Text::MultiCitation}
+            expect(count).to eq(1)
+          end
+        end
+      end
+    end
+
+    it 'constructs a chapter' do
+      article = JPTSExtractor.extract citation_range_path.open
+      article.body.sections.each do |section|
+        section.each(section) do |block|
+          if block.is_a? JPTSExtractor::ArticlePart::Text
+            chapter = CiteTrans::Text::Chapter.new(block)
+            count = chapter.count {|fragment| fragment.is_a? CiteTrans::Text::RangeCitation}
+            expect(count).to eq(2)
+          end
+        end
+      end
     end
   end
 
-  describe '#each' do
-    it 'enumerates the citations in the chapter' do
-      gandalf_ref = CiteTrans::Reference::Reference.new
-      gandalf_ref.authors = CiteTrans::Reference::PersonGroup.new
-      gandalf_ref.authors.add_name surname: 'Gandalf'
-
-      bilbo_ref = CiteTrans::Reference::Reference.new
-      bilbo_ref.authors = CiteTrans::Reference::PersonGroup.new
-      bilbo_ref.authors.add_name surname: 'Bilbo'
-
-      CiteTrans.end_references << gandalf_ref
-      CiteTrans.end_references << bilbo_ref
-
-      expect(chapter.first.class).to be(CiteTrans::Citation)
-      # chapter.each do |citation|
-      #   puts "citation: #{citation.reference.authors}, text: #{citation.context.to_s}"
-      # end
+  describe '#cite!' do
+    it 'cites a single citation' do
+      article = JPTSExtractor.extract citation_frag_path.open
+      CiteTrans.index_references(article.back.ref_list)
+      article.body.sections.each do |section|
+        section.each(section) do |block|
+          if block.is_a? JPTSExtractor::ArticlePart::Text
+            chapter = CiteTrans::Text::Chapter.new(block)
+            puts chapter.cite!(CiteTrans::MLA).to_s
+          end
+        end
+      end
     end
+
+    it 'cites a multiple citation' do
+      article = JPTSExtractor.extract citation_mult_path.open
+      CiteTrans.index_references(article.back.ref_list)
+      article.body.sections.each do |section|
+        section.each(section) do |block|
+          if block.is_a? JPTSExtractor::ArticlePart::Text
+            chapter = CiteTrans::Text::Chapter.new(block)
+            puts chapter.cite!(CiteTrans::MLA).to_s
+          end
+        end
+      end
+    end
+
+    it 'cites a range citation' do
+      article = JPTSExtractor.extract citation_range_path.open
+      CiteTrans.index_references(article.back.ref_list)
+      article.body.sections.each do |section|
+        section.each(section) do |block|
+          if block.is_a? JPTSExtractor::ArticlePart::Text
+            chapter = CiteTrans::Text::Chapter.new(block)
+            puts chapter.cite!(CiteTrans::MLA).to_s
+          end
+        end
+      end
+    end
+
   end
 end
