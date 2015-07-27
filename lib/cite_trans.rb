@@ -1,47 +1,30 @@
-require 'cite_trans/chapter_extractor'
-require 'cite_trans/cite_notes'
 require 'cite_trans/end_references'
-
 require 'cite_trans/reference/reference'
 require 'cite_trans/reference/person_group'
 require 'cite_trans/text/context'
-require 'cite_trans/styles/mla'
+require 'cite_trans/text/chapter'
 
 require 'jpts_extractor'
-require 'builder'
+# require 'builder'
 
 module CiteTrans
-  def self.translate!(io)
+  def self.translate!(io, style)
     article = JPTSExtractor.extract(io)
+    return article if style == :vancouver
+
     index_references(article.back.ref_list)
 
      article.body.sections.map do |section|
-    # article.body.sections.map do |section|
       section.map!(section) do |block|
         if block.is_a? JPTSExtractor::ArticlePart::Text
           chapter = Text::Chapter.new(block)
-          chapter.cite! :mla
+          chapter.cite! style
           block = chapter.text
-          # puts block.to_s
         else
           block = block
         end
       end
-      # section_formatter = JPTSExtractor::XML::Section.new(Builder::XmlMarkup.new(indent:2))
-      # section.format(section_formatter)
-      # puts section_formatter.xml.target!
     end
-
-    # sections.each do |section|
-      # section_formatter = JPTSExtractor::XML::Section.new(Builder::XmlMarkup.new(indent:2))
-      # section.format(section_formatter)
-      # puts section_formatter.xml.target!
-      # article.body << section
-    # end
-    # article.body.sections = sections
-    # puts article.front.article_meta.article_title.to_s
-
-    # puts article.body.sections.first.blocks[1].to_s
     article
   end
 
@@ -78,4 +61,7 @@ module CiteTrans
     end
   end
 end
+
+require 'cite_trans/styles/mla'
+require 'cite_trans/styles/apa'
 

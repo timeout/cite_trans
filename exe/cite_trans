@@ -1,11 +1,73 @@
 #!/usr/bin/env ruby
 
 require 'cite_trans'
-require 'jpts_extractor'
+# require 'jpts_extractor'
 
-puts "#{ARGV[0]} #{ARGV[1]}"
+require 'optparse'
 
-file = File.open("#{ARGV[0]}")
-article = CiteTrans.translate! file
+options = Hash.new
+options[:style] = :vancouver
+op = OptionParser.new do |opts|
+  opts.banner = "\nTranslate a JPTS article.\n"
+  opts.separator ''
 
-puts JPTSExtractor.output(article)
+  opts.on('-s', '--style [apa | mla | vancouver]', [:mla, :apa, :vancouver], 'set style to use') do |style|
+    options[:style] = style || :vancouver
+  end
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+
+  opts.on_tail("--version", "Show version") do
+    puts CiteTrans::VERSION
+    exit
+  end
+end
+op.parse!(ARGV)
+
+puts options.inspect
+# puts ARGV.inspect
+# puts "ARGV0: #{ARGV[0]} ARGV1: #{ARGV[1]}"
+
+=begin
+  cite_trans <input> <output>
+  cite_trans <output>             # input STDIN
+  cite_trans <input> -            # output STDOUT
+  cite_trans                      # pass through aka STDIN → STDOUT
+=end
+
+article = nil
+output_filename = input_filename = nil
+case ARGV.size
+when 0
+  if STDIN.tty?
+    puts op.help
+    exit 1
+  end
+when 1
+  if STDIN.tty?
+    puts op.help
+    exit 1
+  end
+  output_filename = ARGV[0]
+when 2
+  input_filename = ARGV[0]
+  output_filename = ARGV[1]
+end
+
+if input_filename.nil?
+  article = CiteTrans.translate! STDIN, options[:style]
+else
+  input_handle = File.open input_filename
+  article = CiteTrans.translate! input_handle, options[:style]
+  input_handle.close
+end
+
+if output_filename.nil?
+  STDOUT.puts JPTSExtractor.output(article)
+else
+  File.open(output_filename, 'w') { |file| file.write JPTSExtractor.output(article) }
+end
+

@@ -48,7 +48,6 @@ module CiteTrans
       end
 
       def cite!(style)
-        # @text = JPTSExtractor::ArticlePart::Text.new
         context = JPTSExtractor::ArticlePart::Text.new
 
         self.each do |fragment|
@@ -60,7 +59,6 @@ module CiteTrans
             self.text.add_fragment fragment
           end
         end
-        # puts result.to_s
         self
       end
 
@@ -92,6 +90,7 @@ module CiteTrans
         when :mla
           cite_style = Styles::MLA.new(citation(context))
         when :apa
+          cite_style = Styles::APA.new(citation(context))
         else
         end
         note = "(#{cite_style.cite})"
@@ -127,6 +126,8 @@ module CiteTrans
             fragment = cite_style.cite
           end.join('; ')
         when :apa
+          notes = self.fragments.map do |fragment|
+          end.join('; ')
         else
         end
         notes = "(#{notes})"
@@ -159,9 +160,13 @@ module CiteTrans
         when :mla
           notes = range.map do |reference_index|
             cite_style = Styles::MLA.new(citation(context, reference_index))
-            fragment = cite_style.cite
+            reference_index = cite_style.cite
           end.join('; ')
         when :apa
+          notes = range.map do |reference_index|
+            cite_style = Styles::APA.new(citation(context, reference_index))
+            reference_index = cite_style.cite
+          end.join('; ')
         else
         end
         notes = "(#{notes})"
