@@ -8,24 +8,40 @@ require 'cite_trans/text/context'
 require 'cite_trans/styles/mla'
 
 require 'jpts_extractor'
+require 'builder'
 
 module CiteTrans
   def self.translate!(io)
     article = JPTSExtractor.extract(io)
     index_references(article.back.ref_list)
 
-    article.body.sections.map do |section|
+     article.body.sections.map do |section|
+    # article.body.sections.map do |section|
       section.map!(section) do |block|
         if block.is_a? JPTSExtractor::ArticlePart::Text
           chapter = Text::Chapter.new(block)
           chapter.cite! :mla
           block = chapter.text
+          # puts block.to_s
         else
           block = block
         end
       end
+      # section_formatter = JPTSExtractor::XML::Section.new(Builder::XmlMarkup.new(indent:2))
+      # section.format(section_formatter)
+      # puts section_formatter.xml.target!
     end
 
+    # sections.each do |section|
+      # section_formatter = JPTSExtractor::XML::Section.new(Builder::XmlMarkup.new(indent:2))
+      # section.format(section_formatter)
+      # puts section_formatter.xml.target!
+      # article.body << section
+    # end
+    # article.body.sections = sections
+    # puts article.front.article_meta.article_title.to_s
+
+    # puts article.body.sections.first.blocks[1].to_s
     article
   end
 

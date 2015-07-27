@@ -40,6 +40,7 @@ module CiteTrans
       end
 
       def text
+        @text ||= JPTSExtractor::ArticlePart::Text.new
       end
 
       def each(&block)
@@ -47,23 +48,24 @@ module CiteTrans
       end
 
       def cite!(style)
-        result = JPTSExtractor::ArticlePart::Text.new
+        # @text = JPTSExtractor::ArticlePart::Text.new
         context = JPTSExtractor::ArticlePart::Text.new
 
         self.each do |fragment|
           if fragment.is_a? CitationFragment
-            result.add_fragment(fragment.cite!(style, context))
+            self.text.add_fragment(fragment.cite!(style, context))
             context.fragments.clear   # start new context
           else
             context.add_fragment fragment
-            result.add_fragment fragment
+            self.text.add_fragment fragment
           end
         end
-        puts result.to_s
-        result
+        # puts result.to_s
+        self
       end
 
       def to_s
+        self.text.nil? ? String.new : self.text.to_s 
       end
 
       private
