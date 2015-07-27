@@ -5,7 +5,7 @@ require 'jpts_extractor'
 
 module CiteTrans
   module Text
-    class Chapter
+    class Paragraph
       include Enumerable
 
       def initialize(text)

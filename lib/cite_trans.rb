@@ -2,7 +2,7 @@ require 'cite_trans/end_references'
 require 'cite_trans/reference/reference'
 require 'cite_trans/reference/person_group'
 require 'cite_trans/text/context'
-require 'cite_trans/text/chapter'
+require 'cite_trans/text/paragraph'
 
 require 'jpts_extractor'
 # require 'builder'
@@ -17,9 +17,9 @@ module CiteTrans
      article.body.sections.map do |section|
       section.map!(section) do |block|
         if block.is_a? JPTSExtractor::ArticlePart::Text
-          chapter = Text::Chapter.new(block)
-          chapter.cite! style
-          block = chapter.text
+          paragraph = Text::Paragraph.new(block)
+          paragraph.cite! style
+          block = paragraph.text
         else
           block = block
         end
