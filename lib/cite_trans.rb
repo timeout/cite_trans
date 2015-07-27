@@ -26,7 +26,6 @@ module CiteTrans
       end
     end
 
-    puts article
     article
   end
 

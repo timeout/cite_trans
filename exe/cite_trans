@@ -4,5 +4,7 @@ require 'cite_trans'
 
 puts "#{ARGV[0]} #{ARGV[1]}"
 
-handle = File.open("#{ARGV[0]}")
-CiteTrans.translate! handle
+file = File.open("#{ARGV[0]}")
+article = CiteTrans.translate! file
+
+JPTSExtractor.output(article)

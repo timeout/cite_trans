@@ -7,9 +7,11 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
+    builder (3.2.2)
     colorize (0.7.7)
     diff-lcs (1.2.5)
     jpts_extractor (0.1.0)
+      builder (~> 3.2.2, >= 3.2.2)
       colorize (~> 0.7.7, >= 0.7.7)
       ox (~> 2.2.0, >= 2.2.0)
     ox (2.2.0)
