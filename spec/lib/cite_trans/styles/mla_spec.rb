@@ -35,10 +35,10 @@ RSpec.describe CiteTrans::Styles::MLA do
 
   describe '#initialize' do
     it 'constructs an Styles::APA' do
-      apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference, 
+      mla = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference, 
                                                                CiteTrans::Text::Context.new(@no_context)))
-      expect(apa.reference).to eq(@reference)
-      expect(apa.context.to_s).to eq(
+      expect(mla.reference).to eq(@reference)
+      expect(mla.context.to_s).to eq(
         "James Barnet is one of Australia's most important colonial architects")
     end
   end
@@ -46,43 +46,52 @@ RSpec.describe CiteTrans::Styles::MLA do
   describe '#cite (no context)' do
     it 'creates an author page parenthetical note for a single author' do
       CiteTrans.end_references << @reference
-      apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
+      mla = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
                                                                CiteTrans::Text::Context.new(@no_context)))
-      expect(apa.cite).to eq('Kohane 23-37')
+      expect(mla.cite).to eq('Kohane 23-37')
     end
 
     it 'formats the location' do
       @reference.last_page = 30
       CiteTrans.end_references << @reference
-      apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
+      mla = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
                                                                CiteTrans::Text::Context.new(@no_context)))
-      expect(apa.cite).to eq('Kohane 23-30')
+      expect(mla.cite).to eq('Kohane 23-30')
     end
 
     it 'formats the location' do
       @reference.first_page = 230
       @reference.last_page = 300
       CiteTrans.end_references << @reference
-      apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
+      mla = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
                                                                CiteTrans::Text::Context.new(@no_context)))
-      expect(apa.cite).to eq('Kohane 230-300')
+      expect(mla.cite).to eq('Kohane 230-300')
+    end
+
+    it 'formats the location' do
+      @reference.first_page = 230
+      @reference.last_page = 0
+      CiteTrans.end_references << @reference
+      mla = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
+                                                               CiteTrans::Text::Context.new(@no_context)))
+      expect(mla.cite).to eq('Kohane 230')
     end
 
     it 'creates an author page note for two authors' do
       @reference.authors.add_name surname: 'Johnson', given_names: 'Chris'
       CiteTrans.end_references << @reference
-      apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
+      mla = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
                                                                CiteTrans::Text::Context.new(@no_context)))
-      expect(apa.cite).to eq('Kohane and Johnson 23-37')
+      expect(mla.cite).to eq('Kohane and Johnson 23-37')
     end
 
     it 'creates an author page note for three authors' do
       @reference.authors.add_name surname: 'Johnson', given_names: 'Chris'
       @reference.authors.add_name surname: 'Bingham-Hall', given_names: 'Patrick'
       CiteTrans.end_references << @reference
-      apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
+      mla = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
                                                                CiteTrans::Text::Context.new(@no_context)))
-      expect(apa.cite).to eq('Kohane, Johnson and Bingham-Hall 23-37')
+      expect(mla.cite).to eq('Kohane, Johnson and Bingham-Hall 23-37')
     end
 
     it 'creats an MLA note for four or more authors' do
@@ -90,26 +99,26 @@ RSpec.describe CiteTrans::Styles::MLA do
       @reference.authors.add_name surname: 'Bingham-Hall', given_names: 'Patrick'
       @reference.authors.add_name surname: 'Keating', given_names: 'Paul'
       CiteTrans.end_references << @reference
-      apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
+      mla = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
                                                                CiteTrans::Text::Context.new(@no_context)))
-      expect(apa.cite).to eq('Kohane et al. 23-37')
+      expect(mla.cite).to eq('Kohane et al. 23-37')
     end
   end
 
   describe '#cite (with context)' do
     it 'creates an author page parenthetical note for a single author' do
       CiteTrans.end_references << @reference
-      apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
+      mla = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
                                                                CiteTrans::Text::Context.new(@with_context)))
-      expect(apa.cite).to eq('23-37')
+      expect(mla.cite).to eq('23-37')
     end
 
     it 'formats the location' do
       @reference.last_page = 28
       CiteTrans.end_references << @reference
-      apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation
+      mla = CiteTrans::Styles::MLA.new(CiteTrans::Citation
         .new(@reference, CiteTrans::Text::Context.new(@with_context)))
-      expect(apa.cite).to eq('23-8')
+      expect(mla.cite).to eq('23-8')
     end
   end
 
@@ -125,9 +134,9 @@ RSpec.describe CiteTrans::Styles::MLA do
       CiteTrans.end_references << @reference
       CiteTrans.end_references << other
 
-      apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation
+      mla = CiteTrans::Styles::MLA.new(CiteTrans::Citation
         .new(@reference, CiteTrans::Text::Context.new(@no_context)))
-      expect(apa.cite).to eq('P. Kohane 23-37')
+      expect(mla.cite).to eq('P. Kohane 23-37')
     end
 
     it 'shared surname, used in context' do
@@ -137,9 +146,9 @@ RSpec.describe CiteTrans::Styles::MLA do
       CiteTrans.end_references << @reference
       CiteTrans.end_references << other
 
-      apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation
+      mla = CiteTrans::Styles::MLA.new(CiteTrans::Citation
         .new(@reference, CiteTrans::Text::Context.new(@with_context_initials)))
-      expect(apa.cite).to eq('23-37')
+      expect(mla.cite).to eq('23-37')
     end
   end
 
@@ -156,9 +165,9 @@ RSpec.describe CiteTrans::Styles::MLA do
       CiteTrans.end_references << @reference
       CiteTrans.end_references << other
 
-      apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation
+      mla = CiteTrans::Styles::MLA.new(CiteTrans::Citation
         .new(@reference, CiteTrans::Text::Context.new(@no_context)))
-      expect(apa.cite).to eq('Kohane, James Barnet 23-37')
+      expect(mla.cite).to eq('Kohane, James Barnet 23-37')
     end
   end
 
@@ -167,9 +176,9 @@ RSpec.describe CiteTrans::Styles::MLA do
     @reference.volume = 25
     CiteTrans.end_references << @reference
     
-      apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation
+      mla = CiteTrans::Styles::MLA.new(CiteTrans::Citation
         .new(@reference, CiteTrans::Text::Context.new(@no_context)))
-      expect(apa.cite).to eq('Kohane 25: 23-37')
+      expect(mla.cite).to eq('Kohane 25: 23-37')
     end
   end
 end

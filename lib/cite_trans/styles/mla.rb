@@ -53,17 +53,19 @@ module CiteTrans
       end
 
       def location
+        if self.reference.volume?
+          "#{self.reference.volume}: #{self.pages}"
+        else
+          "#{self.pages}"
+        end
+      end
+
+      def pages
         first_page = self.reference.first_page
         last_page = self.reference.last_page
-
         pages = MLANumbers.new( normalize_integer(first_page), 
                                normalize_integer(last_page))
-
-        if self.reference.volume?
-          "#{self.reference.volume}: #{pages.format}"
-        else
-          "#{pages.format}"
-        end
+        pages.format
       end
 
       private

@@ -127,6 +127,8 @@ module CiteTrans
           end.join('; ')
         when :apa
           notes = self.fragments.map do |fragment|
+            cite_style = Styles::APA.new(citation(context, index(fragment)))
+            fragment = cite_style.cite
           end.join('; ')
         else
         end

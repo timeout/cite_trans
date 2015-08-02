@@ -10,6 +10,7 @@ RSpec.describe CiteTrans::Text::Paragraph do
   let(:citation_frag_path) {Pathname.new 'spec/fixture/paragraph_citation_fragment.xml'}
   let(:citation_mult_path) {Pathname.new 'spec/fixture/paragraph_multiple_citation.xml'}
   let(:citation_range_path) {Pathname.new 'spec/fixture/paragraph_range_citation.xml'}
+  let(:citation_mixed) {Pathname.new 'spec/fixture/paragraph_mixed.xml'}
 
   describe '#initialize' do
     it 'constructs a paragraph' do
@@ -103,6 +104,19 @@ RSpec.describe CiteTrans::Text::Paragraph do
           if block.is_a? JPTSExtractor::ArticlePart::Text
             paragraph = CiteTrans::Text::Paragraph.new(block)
             puts paragraph.cite!(CiteTrans::MLA).to_s
+          end
+        end
+      end
+    end
+
+    it 'cites a mixed citation' do
+      article = JPTSExtractor.extract citation_mixed.open
+      CiteTrans.index_references(article.back.ref_list)
+      article.body.sections.each do |section|
+        section.each(section) do |block|
+          if block.is_a? JPTSExtractor::ArticlePart::Text
+            paragraph = CiteTrans::Text::Paragraph.new(block)
+            puts paragraph.cite!(CiteTrans::APA).to_s
           end
         end
       end
