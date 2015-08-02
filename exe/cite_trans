@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'cite_trans'
-# require 'jpts_extractor'
-
 require 'optparse'
 
 options = Hash.new
@@ -27,7 +25,6 @@ op = OptionParser.new do |opts|
 end
 op.parse!(ARGV)
 
-puts options.inspect
 # puts ARGV.inspect
 # puts "ARGV0: #{ARGV[0]} ARGV1: #{ARGV[1]}"
 
@@ -65,7 +62,7 @@ else
   input_handle.close
 end
 
-if output_filename.nil?
+if output_filename.nil? or output_filename == '-'
   STDOUT.puts JPTSExtractor.output(article)
 else
   File.open(output_filename, 'w') { |file| file.write JPTSExtractor.output(article) }

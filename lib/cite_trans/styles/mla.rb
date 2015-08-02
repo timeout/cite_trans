@@ -1,4 +1,5 @@
 require 'cite_trans/styles/citation_decorator'
+require 'cite_trans/styles/mla_numbers'
 
 module CiteTrans
   module Styles
@@ -10,11 +11,12 @@ module CiteTrans
 
       def cite
         if self.context.contains_author? self.author
-          "#{self.location}"
+          self.location? ? "#{self.location}" : String.new
         elsif CiteTrans.end_references.multiple_sources? self.reference
-          "#{self.author}, #{self.source} #{self.location}"
+          prefix = "#{self.author}, #{self.source}"
+          self.location? ? "#{prefix} #{self.location}" : "#{prefix}"
         else
-          "#{self.author} #{self.location}"
+          self.location? ? "#{self.author} #{self.location}" : "#{self.author}"
         end
       end
 
@@ -46,27 +48,21 @@ module CiteTrans
         'James Barnet'
       end
 
+      def location?
+        not self.reference.first_page.nil?
+      end
+
       def location
         first_page = self.reference.first_page
         last_page = self.reference.last_page
 
-        fpage_i = normalize_integer(first_page)
-        lpage_i = normalize_integer(last_page)
-
-        diff = lpage_i - fpage_i
-
-        overhang_length = integer_size(diff)
-        output = String.new
-        if overhang_length < integer_size(lpage_i)
-          output = lpage_i.to_s.slice(overhang_length..-1)
-        else
-          output = lpage_i.to_s
-        end
+        pages = MLANumbers.new( normalize_integer(first_page), 
+                               normalize_integer(last_page))
 
         if self.reference.volume?
-          "#{self.reference.volume}: #{first_page}-#{output}"
+          "#{self.reference.volume}: #{pages.format}"
         else
-          "#{first_page}-#{output}"
+          "#{pages.format}"
         end
       end
 

@@ -52,11 +52,20 @@ RSpec.describe CiteTrans::Styles::MLA do
     end
 
     it 'formats the location' do
-      @reference.last_page = 28
+      @reference.last_page = 30
       CiteTrans.end_references << @reference
       apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
                                                                CiteTrans::Text::Context.new(@no_context)))
-      expect(apa.cite).to eq('Kohane 23-8')
+      expect(apa.cite).to eq('Kohane 23-30')
+    end
+
+    it 'formats the location' do
+      @reference.first_page = 230
+      @reference.last_page = 300
+      CiteTrans.end_references << @reference
+      apa = CiteTrans::Styles::MLA.new(CiteTrans::Citation.new(@reference,
+                                                               CiteTrans::Text::Context.new(@no_context)))
+      expect(apa.cite).to eq('Kohane 230-300')
     end
 
     it 'creates an author page note for two authors' do
