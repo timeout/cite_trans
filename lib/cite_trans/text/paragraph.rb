@@ -1,191 +1,105 @@
 require 'cite_trans/text/context'
 require 'cite_trans/errors'
+require 'cite_trans/text/expand'
 
 require 'jpts_extractor'
 
 module CiteTrans
   module Text
     class Paragraph
-      include Enumerable
 
       def initialize(text)
-        @text_stack = Array.new
+        @cited_text = nil
+        @text = Array.new
+        citations = nil
+        flag = false
         text.fragments.each_with_index do |fragment, index|
           if fragment.is_a? JPTSExtractor::ArticlePart::InlineText::Citation
-            next_fragment_text = text.fragments[index + 1].text
-            if !!(next_fragment_text =~ /\A *\]/)
-              text.fragments[index + 1].text = next_fragment_text[1..-1].lstrip
-            end
+            flag = true
+            remove_left_square_bracket if left_square_bracket?
+          end
+          if (right_square_bracket? fragment) and flag
+            fragment.text = remove_right_square_bracket fragment
+            flag = false
+          end
 
-            if @text_stack.last.is_a? CitationFragment
-              cite_group = @text_stack.pop
-              cite_group.fragments << fragment
-              @text_stack << cite_group
-            else
-              remove_left_bracket
-              case next_fragment_text
-              when /\A *, *\Z/
-                cite_frag = MultiCitation.new fragment
-              when /\A *(-|–|—) *\Z/
-                cite_frag = RangeCitation.new fragment
-              else
-                cite_frag = CitationFragment.new fragment
-              end
-            end
-            @text_stack << cite_frag unless cite_frag.nil?
+          if flag
+            citations ||= Array.new
+            citations << fragment
+          elsif citations
+            @text << citations
+            citations = nil
+            @text << fragment
           else
-            @text_stack << fragment unless !!(fragment.text =~ /\A *(,|-|—|–) *\Z/)
+            @text << fragment
           end
         end
       end
 
-      def text
-        @text ||= JPTSExtractor::ArticlePart::Text.new
+      attr_reader :cited_text
+
+      def left_square_bracket?
+        !!(@text.last.text =~ /\[ *\Z/)
       end
 
-      def each(&block)
-        @text_stack.each(&block)
+      def remove_left_square_bracket
+        pos = (@text.last.text =~ /\[ *\Z/)
+        @text[-1].text = @text.last.text[0..(pos - 1)].rstrip
+      end
+
+      def right_square_bracket?(fragment)
+        !!(fragment.text =~ /\A *\]/)
+      end
+
+      def remove_right_square_bracket(fragment)
+        pos = (fragment.text =~ /\A *\]/)
+        fragment.text[(pos + 1)..-1].lstrip
+      end
+
+      def expand(cite_array)
+        index = cite_array.map do |in_cite| 
+          char = in_cite.text
+          in_cite = !!(char =~ /[[:digit:]]/) ? char.to_i : char
+        end
+        expand = Expand.new(index)
+        expand.blow_up
       end
 
       def cite!(style)
         context = JPTSExtractor::ArticlePart::Text.new
-
-        self.each do |fragment|
-          if fragment.is_a? CitationFragment
-            self.text.add_fragment(fragment.cite!(style, context))
-            context.fragments.clear   # start new context
+        @cited_text = JPTSExtractor::ArticlePart::Text.new
+        @text.each do |entry|
+          if entry.is_a? Array
+            self.cited_text.add_fragment(cite(entry, style, context))
+            context.fragments.clear
           else
-            context.add_fragment fragment
-            self.text.add_fragment fragment
+            context.add_fragment entry
+            self.cited_text.add_fragment entry
           end
         end
         self
       end
 
       def to_s
-        self.text.nil? ? String.new : self.text.to_s 
+        self.cited_text.nil? ? String.new : self.cited_text.to_s 
       end
 
-      private
-      def remove_left_bracket
-        unless @text_stack.last.nil?
-          last_fragment_text = @text_stack.last.text
-          if !!(last_fragment_text =~ /\[ *\Z/)
-            @text_stack[-1].text = last_fragment_text[0..-2].rstrip
+      def cite(cite_array, style, context)
+        index = self.expand(cite_array)
+        text_frags = index.map do |ref_index|
+          reference = CiteTrans.end_references[ref_index]
+          citation = Citation.new(reference, Text::Context.new(context))
+          case style
+          when :apa
+            style_cite = Styles::APA.new(citation)
+          when :mla
+            style_cite = Styles::MLA.new(citation)
           end
+          ref_index = style_cite.cite
         end
-      end
-    end
-
-    class CitationFragment
-      def initialize(fragment)
-        @fragments = Array.new
-        @fragments << fragment
-      end
-
-      attr_accessor :fragments
-
-      def cite!(style, context)
-        case style
-        when :mla
-          cite_style = Styles::MLA.new(citation(context))
-        when :apa
-          cite_style = Styles::APA.new(citation(context))
-        else
-        end
-        note = "(#{cite_style.cite})"
-        JPTSExtractor::ArticlePart::InlineText::Citation
-          .new(JPTSExtractor::ArticlePart::InlineText::InlineText.new(note))
-      end
-
-      private
-      def index
-        index = @fragments.first.text.to_i
-        raise EndReferenceIndexError.new("Illegal Index: #{index}") unless index > 0
-        index - 1
-      end
-
-      def citation(context)
-        reference = CiteTrans.end_references[index]
-        CiteTrans::Citation.new(reference, Text::Context.new(context))
-      end
-
-    end
-
-    class MultiCitation < CitationFragment
-      def initialize(fragment)
-        super(fragment)
-      end
-
-      def cite!(style, context)
-        notes = nil
-        case style
-        when :mla
-          notes = self.fragments.map do |fragment|
-            cite_style = Styles::MLA.new(citation(context, index(fragment)))
-            fragment = cite_style.cite
-          end.join('; ')
-        when :apa
-          notes = self.fragments.map do |fragment|
-            cite_style = Styles::APA.new(citation(context, index(fragment)))
-            fragment = cite_style.cite
-          end.join('; ')
-        else
-        end
-        notes = "(#{notes})"
-        JPTSExtractor::ArticlePart::InlineText::Citation
-          .new(JPTSExtractor::ArticlePart::InlineText::InlineText.new(notes))
-      end
-
-      private
-      def index(fragment)
-        index = fragment.text.to_i
-        raise EndReferenceIndexError.new("Illegal Index: #{index}") unless index > 0
-        index - 1
-      end
-
-      def citation(context, index)
-        reference = CiteTrans.end_references[index]
-        CiteTrans::Citation.new(reference, Text::Context.new(context))
-      end
-    end
-
-    class RangeCitation < CitationFragment
-      def initialize(fragment)
-        super(fragment)
-      end
-
-      def cite!(style, context)
-        range = Range.new(index(fragments.first), index(fragments.last))
-        notes = nil
-        case style
-        when :mla
-          notes = range.map do |reference_index|
-            cite_style = Styles::MLA.new(citation(context, reference_index))
-            reference_index = cite_style.cite
-          end.join('; ')
-        when :apa
-          notes = range.map do |reference_index|
-            cite_style = Styles::APA.new(citation(context, reference_index))
-            reference_index = cite_style.cite
-          end.join('; ')
-        else
-        end
-        notes = "(#{notes})"
-        JPTSExtractor::ArticlePart::InlineText::Citation
-          .new(JPTSExtractor::ArticlePart::InlineText::InlineText.new(notes))
-      end
-
-      private
-      def index(fragment)
-        index = fragment.text.to_i
-        raise EndReferenceIndexError.new("Illegal Index: #{index}") unless index > 0
-        index - 1
-      end
-
-      def citation(context, index)
-        reference = CiteTrans.end_references[index]
-        CiteTrans::Citation.new(reference, Text::Context.new(context))
+        citation_note = "(#{text_frags.join('; ')})"
+        cite_frag = JPTSExtractor::ArticlePart::InlineText::InlineText.new(citation_note)
+        JPTSExtractor::ArticlePart::InlineText::Citation.new(cite_frag)
       end
     end
   end
