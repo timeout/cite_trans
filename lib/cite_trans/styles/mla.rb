@@ -45,7 +45,7 @@ module CiteTrans
       end
 
       def source
-        'James Barnet'
+        self.reference.source
       end
 
       def location?

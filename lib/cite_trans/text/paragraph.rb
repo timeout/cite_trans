@@ -9,8 +9,8 @@ module CiteTrans
     class Paragraph
 
       def initialize(text)
-        @cited_text = nil
-        @text = Array.new
+        @text = nil
+        @text_fragments = Array.new
         citations = nil
         flag = false
         text.fragments.each_with_index do |fragment, index|
@@ -27,24 +27,24 @@ module CiteTrans
             citations ||= Array.new
             citations << fragment
           elsif citations
-            @text << citations
+            @text_fragments << citations
             citations = nil
-            @text << fragment
+            @text_fragments << fragment
           else
-            @text << fragment
+            @text_fragments << fragment
           end
         end
       end
 
-      attr_reader :cited_text
+      attr_reader :text
 
       def left_square_bracket?
-        !!(@text.last.text =~ /\[ *\Z/)
+        !!(@text_fragments.last.text =~ /\[ *\Z/)
       end
 
       def remove_left_square_bracket
-        pos = (@text.last.text =~ /\[ *\Z/)
-        @text[-1].text = @text.last.text[0..(pos - 1)].rstrip
+        pos = (@text_fragments.last.text =~ /\[ *\Z/)
+        @text_fragments[-1].text = @text_fragments.last.text[0..(pos - 1)].rstrip
       end
 
       def right_square_bracket?(fragment)
@@ -67,27 +67,29 @@ module CiteTrans
 
       def cite!(style)
         context = JPTSExtractor::ArticlePart::Text.new
-        @cited_text = JPTSExtractor::ArticlePart::Text.new
-        @text.each do |entry|
+        @text = JPTSExtractor::ArticlePart::Text.new
+        @text_fragments.each do |entry|
           if entry.is_a? Array
-            self.cited_text.add_fragment(cite(entry, style, context))
+            self.text.add_fragment(cite(entry, style, context))
             context.fragments.clear
           else
             context.add_fragment entry
-            self.cited_text.add_fragment entry
+            self.text.add_fragment entry
           end
         end
         self
       end
 
       def to_s
-        self.cited_text.nil? ? String.new : self.cited_text.to_s 
+        self.text.nil? ? String.new : self.text.to_s 
       end
 
       def cite(cite_array, style, context)
         index = self.expand(cite_array)
+        puts ">>>>>>>>>>>>>>> cite_array: #{cite_array}"
+        puts ">>>>>>>>>>>>>>> index: #{index}"
         text_frags = index.map do |ref_index|
-          reference = CiteTrans.end_references[ref_index]
+          reference = CiteTrans.end_references[ref_index - 1]
           citation = Citation.new(reference, Text::Context.new(context))
           case style
           when :apa

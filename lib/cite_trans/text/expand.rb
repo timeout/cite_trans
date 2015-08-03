@@ -22,7 +22,7 @@ module CiteTrans
       end
 
       def contains_range?
-        self.array.include? '-' or self.array.include? '–' or self.array.include? '—'
+        self.array.include? '-' or self.array.include? '-' or self.array.include? '–' or self.array.include? '—'
       end
 
       def expand_range(start, finish)
@@ -30,7 +30,7 @@ module CiteTrans
       end
 
       def range_symbol_index
-        self.array.each_with_index { |entry, index| return index if ['-','–','—'].include? entry }
+        self.array.each_with_index { |entry, index| return index if ['-','–','—', '-'].include? entry }
       end
 
     end
