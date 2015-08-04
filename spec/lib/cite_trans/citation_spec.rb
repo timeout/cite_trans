@@ -14,7 +14,7 @@ RSpec.describe CiteTrans::Citation do
       ref.authors = author
       text.add_fragment(JPTSExtractor::ArticlePart::InlineText::InlineText
         .new('This is the text context'))
-      CiteTrans::Citation.new(ref, text)
+      CiteTrans::Citation.new(ref)
     end
 
     it 'reads the reference' do
@@ -22,17 +22,8 @@ RSpec.describe CiteTrans::Citation do
       ref.authors = author
       text.add_fragment(JPTSExtractor::ArticlePart::InlineText::InlineText
         .new('This is the text context'))
-      citation = CiteTrans::Citation.new(ref, text)
+      citation = CiteTrans::Citation.new(ref)
       expect(citation.reference.authors.include? 'Holland').to be_truthy
-    end
-
-    it 'reads the text context' do
-      author.add_name surname: 'Holland', given_names: 'WG'
-      ref.authors = author
-      text.add_fragment(JPTSExtractor::ArticlePart::InlineText::InlineText
-        .new('This is the text context'))
-      citation = CiteTrans::Citation.new(ref, text)
-      expect(citation.context.to_s).to eq 'This is the text context'
     end
   end
 

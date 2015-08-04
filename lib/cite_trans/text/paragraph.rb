@@ -86,18 +86,15 @@ module CiteTrans
 
       def cite(cite_array, style, context)
         index = self.expand(cite_array)
-        puts ">>>>>>>>>>>>>>> cite_array: #{cite_array}"
-        puts ">>>>>>>>>>>>>>> index: #{index}"
         text_frags = index.map do |ref_index|
           reference = CiteTrans.end_references[ref_index - 1]
-          citation = Citation.new(reference, Text::Context.new(context))
           case style
           when :apa
-            style_cite = Styles::APA.new(citation)
+            style_cite = Styles::APA.new(reference)
           when :mla
-            style_cite = Styles::MLA.new(citation)
+            style_cite = Styles::MLA.new(reference)
           end
-          ref_index = style_cite.cite
+          ref_index = style_cite.cite Text::Context.new(context)
         end
         citation_note = "(#{text_frags.join('; ')})"
         cite_frag = JPTSExtractor::ArticlePart::InlineText::InlineText.new(citation_note)

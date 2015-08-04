@@ -3,13 +3,15 @@ require 'cite_trans/errors'
 module CiteTrans
   class Citation
 
-    def initialize(reference, context)
-      @reference, @context = reference, context
+    def initialize(reference)
+      @reference = reference
     end
 
-    attr_accessor :reference, :context
+    attr_accessor :reference
 
-    def cite; end
+    def cite(context) 
+      raise NotImplementedError.new
+    end
 
   end
 end

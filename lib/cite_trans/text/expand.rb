@@ -17,7 +17,7 @@ module CiteTrans
           self.array.delete_at(index)
           self.array.flatten!
         end
-        self.array.delete(', ')
+        self.array.delete_if{ |entry| entry =~ /\A *, *\Z/ }
         self.array
       end
 

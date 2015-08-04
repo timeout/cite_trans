@@ -4,7 +4,7 @@ module CiteTrans
       include Comparable
 
       attr_accessor :authors, :year, :title, :source, :first_page,
-        :last_page, :volume, :index
+        :last_page, :volume, :index, :publisher
 
       # this is a pragmatic compromise, I hope
       def <=> (other)

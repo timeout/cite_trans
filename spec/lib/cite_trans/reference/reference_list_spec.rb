@@ -1,4 +1,4 @@
-require 'cite_trans/end_references'
+require 'cite_trans/reference/reference_list'
 
 def make_reference(name, source)
   reference = CiteTrans::Reference::Reference.new
@@ -8,13 +8,13 @@ def make_reference(name, source)
   reference
 end
 
-RSpec.describe CiteTrans::EndReferences do
+RSpec.describe CiteTrans::Reference::ReferenceList do
 
   describe '#add_reference' do
     before(:each) do
       @kpopper = make_reference({surname: 'Popper', given_names: 'Karl Raimund'}, 
                                 'The Open Society and Its Enemies')
-      @end_references = CiteTrans::EndReferences.new
+      @end_references = CiteTrans::Reference::ReferenceList.new
 
       @end_references << make_reference({surname: 'Popper', given_names: 'Frank'}, 
                                         'From Technological to Virtual Art')

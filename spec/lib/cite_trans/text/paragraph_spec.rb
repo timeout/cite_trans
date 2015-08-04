@@ -74,7 +74,7 @@ RSpec.describe CiteTrans::Text::Paragraph do
     describe '#cite!' do
       it 'cites a single citation' do
         article = JPTSExtractor.extract citation_frag_path.open
-        CiteTrans.index_references(article.back.ref_list)
+        CiteTrans.index_references(article)
         article.body.sections.each do |section|
           section.each(section) do |block|
             if block.is_a? JPTSExtractor::ArticlePart::Text
@@ -87,7 +87,7 @@ RSpec.describe CiteTrans::Text::Paragraph do
 
       it 'cites a multiple citation' do
         article = JPTSExtractor.extract citation_mult_path.open
-        CiteTrans.index_references(article.back.ref_list)
+        CiteTrans.index_references(article)
         article.body.sections.each do |section|
           section.each(section) do |block|
             if block.is_a? JPTSExtractor::ArticlePart::Text
@@ -100,7 +100,7 @@ RSpec.describe CiteTrans::Text::Paragraph do
 
       it 'cites a range citation' do
         article = JPTSExtractor.extract citation_range_path.open
-        CiteTrans.index_references(article.back.ref_list)
+        CiteTrans.index_references(article)
         article.body.sections.each do |section|
           section.each(section) do |block|
             if block.is_a? JPTSExtractor::ArticlePart::Text
@@ -113,7 +113,7 @@ RSpec.describe CiteTrans::Text::Paragraph do
 
       it 'cites a mixed citation' do
         article = JPTSExtractor.extract citation_mixed.open
-        CiteTrans.index_references(article.back.ref_list)
+        CiteTrans.index_references(article)
         article.body.sections.each do |section|
           section.each(section) do |block|
             if block.is_a? JPTSExtractor::ArticlePart::Text

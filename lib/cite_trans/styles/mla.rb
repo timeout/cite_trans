@@ -1,16 +1,17 @@
 require 'cite_trans/styles/citation_decorator'
+require 'cite_trans/text/context'
 require 'cite_trans/styles/mla_numbers'
 
 module CiteTrans
   module Styles
     class MLA < CitationDecorator
 
-      def initialize(citation)
-        super(citation)
+      def initialize(reference)
+        super(reference)
       end
 
-      def cite
-        if self.context.contains_author? self.author
+      def cite(context)
+        if context.contains_author? self.author
           self.location? ? "#{self.location}" : String.new
         elsif CiteTrans.end_references.multiple_sources? self.reference
           prefix = "#{self.author}, #{self.source}"
@@ -20,8 +21,8 @@ module CiteTrans
         end
       end
 
-      def author
-        if CiteTrans.end_references.detect_same_surname reference
+      def author(reference_list = CiteTrans.end_references)
+        if reference_list.detect_same_surname reference
           # include initials in author string
           self.reference.authors.initials
             .zip(self.reference.authors.surnames).each do |name|

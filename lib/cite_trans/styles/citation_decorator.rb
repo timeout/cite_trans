@@ -4,8 +4,8 @@ module CiteTrans
   module Styles
     class CitationDecorator
 
-      def initialize(citation)
-        @citation = citation
+      def initialize(reference)
+        @citation = Citation.new(reference)
       end
 
       def reference
@@ -16,16 +16,8 @@ module CiteTrans
         @citation.reference = reference
       end
 
-      def context
-        @citation.context
-      end
-
-      def context= (text)
-        @citation.context = text
-      end
-
-      def cite
-        @citation.cite
+      def cite(context)
+        @citation.cite(context)
       end
     end
   end
