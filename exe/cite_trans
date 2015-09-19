@@ -5,12 +5,18 @@ require 'optparse'
 
 options = Hash.new
 options[:style] = :vancouver
+options[:format] = :xml
+
 op = OptionParser.new do |opts|
   opts.banner = "\nTranslate a JPTS article.\n"
   opts.separator ''
 
   opts.on('-s', '--style [apa | mla | vancouver]', [:mla, :apa, :vancouver], 'set style to use') do |style|
     options[:style] = style || :vancouver
+  end
+
+  opts.on('-f', '--format [xml | txt]', [:xml,  :txt], 'format') do |format|
+    options[:format] = format || :xml
   end
 
   opts.on_tail("-h", "--help", "Show this message") do
@@ -62,9 +68,16 @@ else
   input_handle.close
 end
 
-if output_filename.nil? or output_filename == '-'
-  STDOUT.puts JPTSExtractor.output(article)
+output = nil
+if options[:format] == :txt
+  output = JPTSExtractor.text(article)
 else
-  File.open(output_filename, 'w') { |file| file.write JPTSExtractor.output(article) }
+  output = JPTSExtractor.output(article)
+end
+
+if output_filename.nil? or output_filename == '-'
+  STDOUT.puts output
+else
+  File.open(output_filename, 'w') { |file| file.write output }
 end
 

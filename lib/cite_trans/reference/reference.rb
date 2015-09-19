@@ -1,3 +1,5 @@
+require 'cite_trans/reference/person_group'
+
 module CiteTrans
   module Reference
     class Reference

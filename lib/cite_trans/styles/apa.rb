@@ -21,7 +21,7 @@ module CiteTrans
       def publisher
         publisher_name = self.reference.publisher
         if publisher_name.nil? 
-          "#{BAD CITATION}"
+          "BAD CITATION"
         else
           split_name = publisher_name.split
           if split_name.size > 1
